@@ -1,0 +1,70 @@
+---
+title: "R-markdown"
+author: "Enoch Alex"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+
+
+```{r load-data, message=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(rmarkdown)
+library(ggpubr)
+#load the dataset
+pop_data <- read.csv("data/gapminder_data.csv")
+
+#create a table with data from European countries in 2007 showing the countries with the largest life expectancy
+euro_data_tbl <- pop_data %>%
+                    filter(continent == "Europe" & year ==2007) %>%
+                    select(-continent, -year) %>%
+                    arrange(desc(lifeExp)) %>%
+                    rename("Country" = country, "Population Size" = pop,
+                           "Life Expectancy" = lifeExp, "GDP" = gdpPercap)
+  
+```
+# Here we have our dataset
+```{r creat-table}
+
+euro_data_tbl %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+```{r creat-table-2}
+euro_data_tbl %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+```{r}
+euro_data_tbl %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", font_size = 1))
+```
+Here is an example of how to display a massive table
+```{r paged-table}
+paged_table(euro_data_tbl)
+```
+Next, the life expectancy in Europe is observed across different years.  The aim of this is to check if there was a change in life expectancy over the years.  The data used for the life expectancy over the years analysis is the gapminder data and the following data manipulation was performed:
+
+```{r fig-data}
+#keep on European data and change year to factor
+euro_data_fig <- pop_data %>% 
+                    filter(continent == "Europe")  %>% 
+                    mutate(year=as_factor(year))
+```
+
+The life expectancy for Europe over the years is plotted as following:
+
+```{r fig, warning=FALSE, fig.cap="Life Expectancy in Europe over the years"}
+#Euro plot
+euro_plot <- euro_data_fig %>%
+                ggplot(mapping=aes(x=year, y=lifeExp)) +
+                geom_violin() +
+                stat_summary(fun.y = median, geom = "point")
+
+#draw euro plot
+euro_plot
+```
+!
